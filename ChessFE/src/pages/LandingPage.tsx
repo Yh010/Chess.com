@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import ChessBoard from "../assets/chessBoard.png";
+import Button from "../components/Button";
 function LandingPage() {
   const navigate = useNavigate();
   return (
@@ -17,14 +18,13 @@ function LandingPage() {
             </div>
 
             <div className="mt-4 flex justify-center">
-              <button
-                className="bg-green-500 hover:bg-green-700 text-white text-2xl font-bold py-4 px-8 rounded"
+              <Button
                 onClick={() => {
                   navigate("/gamePage");
                 }}
               >
                 Play now
-              </button>
+              </Button>
             </div>
           </div>
         </div>
