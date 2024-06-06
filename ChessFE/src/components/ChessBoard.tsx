@@ -1,10 +1,10 @@
 import { Color, PieceSymbol, Square } from "chess.js";
-import { useState } from "react";
-import { MOVE } from "../pages/GamePage";
+import { useEffect, useState } from "react";
+import { MOVE, INIT_GAME } from "../pages/GamePage";
 
 function ChessBoard({
-  chess,
   board,
+  chess,
   socket,
   setBoard,
 }: {
@@ -13,11 +13,29 @@ function ChessBoard({
     type: PieceSymbol;
     color: Color;
   } | null)[][];
+  chess: any;
   socket: WebSocket;
   setBoard: any;
-  chess: any;
 }) {
   const [from, setFrom] = useState<null | Square>(null);
+
+  useEffect(() => {
+    socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === MOVE) {
+        const move = message.payload.move;
+        chess.move(move);
+        setBoard(chess.board());
+      } else if (message.type === INIT_GAME) {
+        const { color } = message.payload;
+        console.log(`You are playing as ${color}`);
+      }
+    };
+
+    return () => {
+      socket.onmessage = null;
+    };
+  }, [socket, chess, setBoard]);
 
   return (
     <div className="text-white-200">
@@ -45,12 +63,12 @@ function ChessBoard({
                           },
                         })
                       );
-                      setFrom(null);
                       chess.move({
                         from,
                         to: squareRepresentation,
                       });
                       setBoard(chess.board());
+                      setFrom(null);
                     }
                   }}
                   key={j}

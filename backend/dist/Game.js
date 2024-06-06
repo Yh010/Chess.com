@@ -9,7 +9,7 @@ class Game {
         this.player1 = player1;
         this.player2 = player2;
         this.board = new chess_js_1.Chess();
-        this.startTime = new Date();
+        // Initialize the game for both players
         this.player1.send(JSON.stringify({
             type: messages_1.INIT_GAME,
             payload: {
@@ -24,51 +24,45 @@ class Game {
         }));
     }
     makeMove(socket, move) {
-        if (this.moveCount % 2 === 0 && socket !== this.player1) {
-            return;
-        }
-        if (this.moveCount % 2 === 1 && socket !== this.player2) {
+        // Check if it's the correct player's turn
+        if ((this.moveCount % 2 === 0 && socket !== this.player1) || (this.moveCount % 2 === 1 && socket !== this.player2)) {
             return;
         }
         try {
-            this.board.move(move);
+            // Attempt to make the move
+            const result = this.board.move(move);
+            // If the move is invalid, result will be null
+            if (result === null) {
+                console.log("Invalid move:", move);
+                return;
+            }
+            // Broadcast the move to both players
+            const message = JSON.stringify({
+                type: messages_1.MOVE,
+                payload: {
+                    move,
+                }
+            });
+            this.player1.send(message);
+            this.player2.send(message);
+            // Check if the game is over
+            if (this.board.isGameOver()) {
+                const gameOverMessage = JSON.stringify({
+                    type: messages_1.GAME_OVER,
+                    payload: {
+                        winner: this.board.turn() === "w" ? "black" : "white",
+                    }
+                });
+                this.player1.send(gameOverMessage);
+                this.player2.send(gameOverMessage);
+                return;
+            }
+            // Increment move count
+            this.moveCount++;
         }
         catch (e) {
-            console.log(e);
-            return;
+            console.error("Error making move:", e);
         }
-        if (this.board.isGameOver()) {
-            this.player1.send(JSON.stringify({
-                type: messages_1.GAME_OVER,
-                payload: {
-                    winner: this.board.turn() === "w" ? "black" : "white"
-                }
-            }));
-            this.player2.send(JSON.stringify({
-                type: messages_1.GAME_OVER,
-                payload: {
-                    winner: this.board.turn() === "w" ? "black" : "white"
-                }
-            }));
-            return;
-        }
-        if (this.moveCount % 2 === 0) {
-            this.player2.send(JSON.stringify({
-                type: messages_1.MOVE,
-                payload: {
-                    move,
-                }
-            }));
-        }
-        else {
-            this.player1.send(JSON.stringify({
-                type: messages_1.MOVE,
-                payload: {
-                    move,
-                }
-            }));
-        }
-        this.moveCount++;
     }
 }
 exports.Game = Game;

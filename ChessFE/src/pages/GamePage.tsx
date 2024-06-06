@@ -19,13 +19,17 @@ function GamePage() {
     }
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
+      console.log(message);
       switch (message.type) {
         case INIT_GAME:
           console.log("game initialized");
+          setChess(new Chess());
           setBoard(chess.board());
+          /* console.log(board); */
           break;
         case MOVE: {
           const move = message.payload;
+          console.log(move);
           chess.move(move);
           setBoard(chess.board());
           console.log("move made");
@@ -45,7 +49,7 @@ function GamePage() {
   return (
     <div className="justify-center flex">
       <div className="pt-8 max-w-screen-lg w-full">
-        <div className="grid grid-cols-6 gap-4 w-full bg-red-400">
+        <div className="grid grid-cols-6 gap-4 w-full">
           <div className="w-full col-span-4 flex justify-center">
             <ChessBoard
               chess={chess}
@@ -65,7 +69,7 @@ function GamePage() {
                   );
                 }}
               >
-                Play now
+                Start game
               </Button>
             </div>
           </div>

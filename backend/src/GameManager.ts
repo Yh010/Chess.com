@@ -2,7 +2,7 @@ import { WebSocket } from "ws";
 import { INIT_GAME, MOVE } from "./messages";
 import { Game } from "./Game";
 
-export class GameManager{
+export class GameManager {
     private games: Game[];
     private waitingUser: WebSocket | null;
     private users: WebSocket[];
@@ -12,8 +12,8 @@ export class GameManager{
         this.waitingUser = null;
         this.users = [];
     }
+
     addUser(socket: WebSocket) {
-       /*  this.games.push(socket); */
         this.users.push(socket);
         this.addHandle(socket);
     }
@@ -23,16 +23,15 @@ export class GameManager{
     }
 
     private addHandle(socket: WebSocket) {
-        //what's this ??
         socket.on("message", (data) => {
             const message = JSON.parse(data.toString());
             if (message.type === INIT_GAME) {
                 if (this.waitingUser) {
-                    //start the game
+                    // Start the game
                     const game = new Game(this.waitingUser, socket);
                     this.games.push(game);
                     this.waitingUser = null;
-
+                    console.log(this.games);
                 } else {
                     this.waitingUser = socket;
                 }
@@ -41,12 +40,9 @@ export class GameManager{
             if (message.type === MOVE) {
                 const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
                 if (game) {
-                    game.makeMove(socket , message.payload.move)
+                    game.makeMove(socket, message.payload.move);
                 }
             }
-        })
-
-        
-
+        });
     }
 }

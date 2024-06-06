@@ -10,7 +10,6 @@ class GameManager {
         this.users = [];
     }
     addUser(socket) {
-        /*  this.games.push(socket); */
         this.users.push(socket);
         this.addHandle(socket);
     }
@@ -18,15 +17,15 @@ class GameManager {
         this.users = this.users.filter(user => user !== socket);
     }
     addHandle(socket) {
-        //what's this ??
         socket.on("message", (data) => {
             const message = JSON.parse(data.toString());
             if (message.type === messages_1.INIT_GAME) {
                 if (this.waitingUser) {
-                    //start the game
+                    // Start the game
                     const game = new Game_1.Game(this.waitingUser, socket);
                     this.games.push(game);
                     this.waitingUser = null;
+                    console.log(this.games);
                 }
                 else {
                     this.waitingUser = socket;
